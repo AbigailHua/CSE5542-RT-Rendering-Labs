@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>hwshen WebGL &mdash; lab1-sample </title>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+  <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <!--  ************** Fragment Shader ************* -->
+  <script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 vColor; 
+
+void main(void) {
+        gl_FragColor = vec4(1,1,0,1); 
+    }
+</script>
+
+  <!--  ************** Vertex Shader ************* -->
+  <script id="shader-vs" type="x-shader/x-vertex">
+
+    attribute vec3 aVertexPosition;
+
+    uniform mat4 uMVMatrix;
+
+    void main(void) {
+
+      gl_Position = vec4(aVertexPosition, 1.0);
+      gl_PointSize = 4.0;
+    }
+</script>
+
+
+  <script type="text/javascript" src="JS/shaders_setup.js"></script>
+  <script type="text/javascript" src="JS/lab1-sample.js"></script>
+
+
+</head>
+
+
+<body onload="webGLStart();">
+  <div class="wrapper">
+    <div class="wrapper-canvas">
+      <canvas id="lab1-canvas" style="border: none;" width="500" height="500"></canvas>
+    </div>
+    <div class="wrapper-usage">
+      <h3>Press key to draw!</h3>
+      <ul>
+        <li><code>p</code>: Point</li>
+        <li><code>h</code>: Horizontal Line</li>
+        <li><code>v</code>: Vertical Line</li>
+        <li><code>t</code>: Triangle</li>
+        <li><code>q</code>: Square</li>
+        <li><code>c</code>: Clear All</li>
+      </ul> 
+    </div>
+  </div>
+
+  
+
+</body>
+
+
+</html>
