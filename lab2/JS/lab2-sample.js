@@ -19,23 +19,26 @@ var PointVertexPositionBuffer;
 var LineVertexPositionBuffer;
 var TriangleVertexPositionBuffer;
 var SquareVertexPositionBuffer;
+var CustomShapeVertexPositionBuffer;
 
 var pointColorBuffer;
 var lineColorBuffer;
 var triangleColorBuffer;
 var squareColorBuffer;
+var customShapeColorBuffer;
 
 var point_colors;
 var line_colors;
 var triangle_colors;
 var square_colors;
+var custom_shape_colors;
 
 const POINT_SIZE = 5.0;
 const SHIFT_DISTANCE = 0.03;
 const ROTATION_ANGLE = 10;
 
-var shape2Num = {'p': 0, 'l': 1, 't': 2, 'q': 3};
-var shape_size = [0, 0, 0, 0];     // shape size counter 
+var shape2Num = {'p': 0, 'l': 1, 't': 2, 'q': 3, 'o': 4};
+var shape_size = [0, 0, 0, 0, 0];     // shape size counter 
 
 var colors = [];   // I am not doing colors, but you should :-) 
 var shapes = [];   // the array to store what shapes are in the list
@@ -178,6 +181,21 @@ function CreateBuffer() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(square_colors), gl.STATIC_DRAW);
     squareColorBuffer.itemSize = 3;
     squareColorBuffer.numItems = 6;
+
+    // create custom shape buffer
+    CustomShapeVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, CustomShapeVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(custom_shape_vertices), gl.STATIC_DRAW);
+    CustomShapeVertexPositionBuffer.itemSize = 3;
+    CustomShapeVertexPositionBuffer.numItems = custom_shape_vertices.length / 3;
+
+    customShapeColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, customShapeColorBuffer);
+    custom_shape_colors = new Array(custom_shape_vertices.length/3).fill([1.0, 0.0, 0.0]).flat();
+    console.log('ccc ', custom_shape_colors);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(custom_shape_colors), gl.STATIC_DRAW);
+    customShapeColorBuffer.itemSize = 3;
+    customShapeColorBuffer.numItems = CustomShapeVertexPositionBuffer.numItems = custom_shape_vertices.length / 3;
 }
 
 ///////////////////////////////////////////////////////
@@ -243,7 +261,7 @@ function draw_lines() {   // lab1 sample - draw lines only
                 gl.deleteBuffer(lineColorBuffer);
                 lineColorBuffer = gl.createBuffer();
                 gl.bindBuffer(gl.ARRAY_BUFFER, lineColorBuffer);
-                line_colors = new Array(6).fill(current_colors).flat();
+                line_colors = new Array(LineVertexPositionBuffer.numItems).fill(current_colors).flat();
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(line_colors), gl.STATIC_DRAW);
                 lineColorBuffer.itemSize = 3;
                 lineColorBuffer.numItems = 2;
@@ -257,7 +275,7 @@ function draw_lines() {   // lab1 sample - draw lines only
                 gl.deleteBuffer(triangleColorBuffer);
                 triangleColorBuffer = gl.createBuffer();
                 gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
-                triangle_colors = new Array(9).fill(current_colors).flat();
+                triangle_colors = new Array(TriangleVertexPositionBuffer.numItems).fill(current_colors).flat();
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangle_colors), gl.STATIC_DRAW);
                 triangleColorBuffer.itemSize = 3;
                 triangleColorBuffer.numItems = 3;
@@ -271,13 +289,27 @@ function draw_lines() {   // lab1 sample - draw lines only
                 gl.deleteBuffer(squareColorBuffer);
                 squareColorBuffer = gl.createBuffer();
                 gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
-                square_colors = new Array(18).fill(current_colors).flat();
+                square_colors = new Array(SquareVertexPositionBuffer.numItems).fill(current_colors).flat();
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(square_colors), gl.STATIC_DRAW);
                 squareColorBuffer.itemSize = 3;
                 squareColorBuffer.numItems = 3;
                 gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, squareColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
                 gl.drawArrays(gl.TRIANGLES, 0, SquareVertexPositionBuffer.numItems);
                 
+                break;
+            case 'o':
+                gl.bindBuffer(gl.ARRAY_BUFFER, CustomShapeVertexPositionBuffer);    // make the custom shape current buffer 
+                gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, CustomShapeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+                gl.deleteBuffer(customShapeColorBuffer);
+                customShapeColorBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, customShapeColorBuffer);
+                custom_shape_colors = new Array(CustomShapeVertexPositionBuffer.numItems).fill(current_colors).flat();
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(custom_shape_colors), gl.STATIC_DRAW);
+                customShapeColorBuffer.itemSize = 3;
+                customShapeColorBuffer.numItems = 1;
+                gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, customShapeColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+                gl.drawArrays(gl.TRIANGLES, 0, CustomShapeVertexPositionBuffer.numItems);
                 break;
         }
     });
@@ -440,6 +472,16 @@ function onKeyDown(event) {
                 console.log('enter q');
             }
             polygon_mode = 'q';
+            addShape();
+            break;
+        // custom shape
+        case 79:
+            if (event.shiftKey) {
+                console.log('enter O');
+            } else {
+                console.log('enter o');
+            }
+            polygon_mode = 'o';
             addShape();
             break;
         ////////////////////////////////////
