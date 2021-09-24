@@ -1,26 +1,26 @@
-
 <!DOCTYPE html>
 
 <html>
 
 <head>
-<title>hwshen WebGL &mdash; lab1-sample </title>
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>hwshen WebGL &mdash; lab1-sample </title>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+  <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 
-<!--  ************** Fragment Shader ************* --> 
-<script id="shader-fs" type="x-shader/x-fragment">
-precision mediump float;
-varying vec4 vColor;
+  <!--  ************** Fragment Shader ************* -->
+  <script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 vColor; 
 
-void main(void) {
-        gl_FragColor = vColor;
+    void main(void) {
+      gl_FragColor = vColor; 
     }
 </script>
 
-<!--  ************** Vertex Shader ************* --> 
-<script id="shader-vs" type="x-shader/x-vertex">
+  <!--  ************** Vertex Shader ************* -->
+  <script id="shader-vs" type="x-shader/x-vertex">
 
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexColor;
@@ -38,26 +38,53 @@ void main(void) {
 </script>
 
 
-<script type="text/javascript" src="JS/shaders_setup.js"></script>
-<script type="text/javascript" src="JS/lab2-sample.js"></script>
-<script type="text/javascript" src="JS/customCoordinates.js"></script>
+  <script type="text/javascript" src="JS/shaders_setup.js"></script>
+  <script type="text/javascript" src="JS/lab2-sample.js"></script>
+  <script type="text/javascript" src="JS/customCoordinates.js"></script>
 
 
 </head>
 
 
 <body onload="webGLStart();">
+  <div class="wrapper">
+    <div class="wrapper-canvas">
+      <canvas id="lab1-canvas" style="border: none;" width="500" height="500"></canvas>
+    </div>
+    <div class="wrapper-usage">
+      <h3>Press key to draw!</h3>
+      <h4>Shapes</h4>
+      <ul>
+        <li><code>P/p</code>: Point</li>
+        <li><code>L/l</code>: Horizontal Line</li>
+        <li><code>T/t</code>: Triangle</li>
+        <li><code>Q/q</code>: Square</li>
+        <li><code>O/o</code>: Surprise!</li>
+        <li><code>C/c</code>: Clear All</li>
+      </ul>
+      <h4>Colors</h4>
+      <ul>
+        <li><code>r</code>: Red</li>
+        <li><code>G/g</code>: Green</li>
+        <li><code>B/b</code>: Blue</li>
+      </ul> 
+    </div>
+    <div class="wrapper-usage" style="margin-top: 60px;">
+      <h4>Rotation, Translation & Scaling</h4>
+      <ul>
+        <li><code>R</code>: Rotate (counterclockwise, 10°)</li>
+        <li><code>A/a</code>: Move Left</li>
+        <li><code>W/w</code>: Move Up</li>
+        <li><code>S/s</code>: Move Down</li>
+        <li><code>D/d</code>: Move Right</li>
+        <li><code>E/e</code>: Enlarge / Reduce</li>
+      </ul> 
+    </div>
+  </div>
 
-    <canvas id="lab1-canvas"style="border:none;"width="500"height="500"></canvas>
+  
 
-      <footer>
-    <center>
-      <p>&copy; CSE 5542 Lab2 WebGL example: Han-Wei Shen, Ohio State University, 2019</p>
-    </center>
-    </footer>
-    
 </body>
 
 
 </html>
-

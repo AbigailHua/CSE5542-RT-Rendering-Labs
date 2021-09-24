@@ -1,0 +1,37 @@
+html {
+    -webkit-font-smoothing: antialiased;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+body {
+    font-family: "Open Sans","Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: rgb(51, 51, 51);
+    line-height: 1.6;
+}
+
+.wrapper {
+    display: grid;
+    grid-template-columns: 500px 300px 300px;
+}
+
+.wrapper-usage {
+    margin: 0.5em 0;
+    text-align: left; margin-left: 50px;
+}
+
+li {
+    margin: 0.5em;
+}
+
+code {
+    --monospace: "Lucida Console",Consolas,"Courier",monospace;
+    background-color: #f3f4f4;
+    padding: 0 2px 0 2px;
+    text-align: left;
+    vertical-align: initial;
+    font-family: var(--monospace);
+    border: 1px solid #e7eaed;
+    border-radius: 3px;
+    font-size: 0.9em;
+    box-sizing: border-box;
+}

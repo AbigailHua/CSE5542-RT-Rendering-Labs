@@ -42,9 +42,8 @@ var shape_size = [0, 0, 0, 0, 0];     // shape size counter
 
 var colors = [];   // I am not doing colors, but you should :-) 
 var shapes = [];   // the array to store what shapes are in the list
-var shapes_tx= [];   // x translation  
-var shapes_ty= [];   // y translation 
-var shapes_rotation= [];  // rotation angle 
+
+var translation_matrices = [];
 var shapes_scale= [];   // scaling factor (uniform is assumed)  
 
 var polygon_mode = 'h';  //default = h line 
@@ -220,17 +219,9 @@ function draw_lines() {   // lab1 sample - draw lines only
     
 
     shapes.forEach((value, i) => {
-        mat4.identity(mvMatrix);
+        mvMatrix = translation_matrices[i];
         pointSize = POINT_SIZE * shapes_scale[i];
-        var trans = [0,0,0];
-        trans[0] = shapes_tx[i]; 
-        trans[1] = shapes_ty[i];
-        trans[2] = 0.0; 
-        mvMatrix = mat4.translate(mvMatrix, trans);  // move from origin to mouse click 
-        mvMatrix = mat4.rotate(mvMatrix, degToRad(shapes_rotation[i]), [0, 0, 1]);  // rotate if any 
-        var scale = [1,1,1];
-        scale[0] = scale[1] = scale[2] = shapes_scale[i]; 
-        mvMatrix = mat4.scale(mvMatrix, scale);  // scale if any
+
         let current_colors;
         if (colors[i] == 'r') current_colors = [1.0, 0.0, 0.0];
         else if (colors[i] == 'g') current_colors = [0.0, 1.0, 0.0];
@@ -349,75 +340,78 @@ var lastMouseX = 0, lastMouseY = 0;
 
 ///////////////////////////////////////////////////////////////
 
-function onDocumentMouseDown( event ) {
-    event.preventDefault();
-    document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-    document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-    document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+// function onDocumentMouseDown( event ) {
+//     event.preventDefault();
+//     document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+//     document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+//     document.addEventListener( 'mouseout', onDocumentMouseOut, false );
 
-    var mouseX = event.clientX;
-    var mouseY = event.ClientY; 
+//     var mouseX = event.clientX;
+//     var mouseY = event.ClientY; 
 
-    lastMouseX = mouseX;
-    lastMouseY = mouseY;
+//     lastMouseX = mouseX;
+//     lastMouseY = mouseY;
     
     
-    var NDC_X = (event.clientX - vp_minX)/vp_width*2 -1; 
-    var NDC_Y = ((vp_height-event.clientY) - vp_minY)/vp_height*2 - 1 ;
-    console.log("NDC click", event.clientX, event.clientY, NDC_X, NDC_Y);
+//     var NDC_X = (event.clientX - vp_minX)/vp_width*2 -1; 
+//     var NDC_Y = ((vp_height-event.clientY) - vp_minY)/vp_height*2 - 1 ;
+//     console.log("NDC click", event.clientX, event.clientY, NDC_X, NDC_Y);
 
-    shapes.push(polygon_mode);
-    colors.push(color_mode);
-    shapes_tx.push(NDC_X); shapes_ty.push(NDC_Y); shapes_rotation.push(0.0); shapes_scale.push(1.0);
+//     shapes.push(polygon_mode);
+//     colors.push(color_mode);
+//     shapes_tx.push(NDC_X); shapes_ty.push(NDC_Y); shapes_rotation.push(0.0); shapes_scale.push(1.0);
 
-    Z_angle = 0.0;
-    shape_size++;
+//     Z_angle = 0.0;
+//     shape_size++;
 
-    console.log("size=", shape_size);
-    console.log("shape = ", polygon_mode);
+//     console.log("size=", shape_size);
+//     console.log("shape = ", polygon_mode);
     
-    drawScene();	 // draw the VBO 
-}
+//     drawScene();	 // draw the VBO 
+// }
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
 //   Mouse button handlers 
 //
-     function onDocumentMouseMove( event ) {  //update the rotation angle 
-	 var mouseX = event.clientX;
-         var mouseY = event.ClientY; 
+    //  function onDocumentMouseMove( event ) {  //update the rotation angle 
+	//  var mouseX = event.clientX;
+    //      var mouseY = event.ClientY; 
 
-         var diffX = mouseX - lastMouseX;
-         var diffY = mouseY - lastMouseY;
+    //      var diffX = mouseX - lastMouseX;
+    //      var diffY = mouseY - lastMouseY;
 
-         Z_angle = Z_angle + diffX/5;
+    //      Z_angle = Z_angle + diffX/5;
 	 
-         lastMouseX = mouseX;
-         lastMouseY = mouseY;
-	 shapes_rotation[shape_size-1] = Z_angle;   // update the rotation angle 
+    //      lastMouseX = mouseX;
+    //      lastMouseY = mouseY;
+	//  shapes_rotation[shape_size-1] = Z_angle;   // update the rotation angle 
 
-	 drawScene();	 // draw the VBO 
-     }
-     function onDocumentMouseUp( event ) {
-         document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-         document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-         document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-     }
+	//  drawScene();	 // draw the VBO 
+    //  }
+    //  function onDocumentMouseUp( event ) {
+    //      document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+    //      document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+    //      document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+    //  }
 
-     function onDocumentMouseOut( event ) {
-          document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-          document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-          document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-     }
+    //  function onDocumentMouseOut( event ) {
+    //       document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+    //       document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+    //       document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+    //  }
 
 function addShape() {
     shapes.push(polygon_mode);
     colors.push(color_mode);
     
-    shapes_tx.push(Math.random() * 2 - 1);
-    shapes_ty.push(Math.random() * 2 - 1);
-    shapes_rotation.push(0.0);
+    var tmpMatrix = mat4.create();
+    mat4.identity(tmpMatrix);
+    // random location
+    tmpMatrix = mat4.translate(tmpMatrix, [Math.random()*2-1, Math.random()*2-1, 0]);  // move from origin to mouse click 
+
+    translation_matrices.push(tmpMatrix);
     shapes_scale.push(1.0);
 
     Z_angle = 0.0;
@@ -494,7 +488,9 @@ function onKeyDown(event) {
             } else {
                 console.log('enter a');
             }
-            shapes_tx[shapes_tx.length-1] -= SHIFT_DISTANCE;
+            mvMatrix = translation_matrices.pop();
+            mvMatrix = mat4.translate(mvMatrix, [-SHIFT_DISTANCE, 0, 0]);
+            translation_matrices.push(mvMatrix);
             break;
         // d: move right
         case 68:
@@ -503,7 +499,9 @@ function onKeyDown(event) {
             } else {
                 console.log('enter d');
             }
-            shapes_tx[shapes_tx.length-1] += SHIFT_DISTANCE;
+            mvMatrix = translation_matrices.pop();
+            mvMatrix = mat4.translate(mvMatrix, [SHIFT_DISTANCE, 0, 0]);
+            translation_matrices.push(mvMatrix);
             break;
         // s: move down
         case 83:
@@ -512,7 +510,9 @@ function onKeyDown(event) {
             } else {
                 console.log('enter s');
             }
-            shapes_ty[shapes_ty.length-1] -= SHIFT_DISTANCE;
+            mvMatrix = translation_matrices.pop();
+            mvMatrix = mat4.translate(mvMatrix, [0, -SHIFT_DISTANCE, 0]);
+            translation_matrices.push(mvMatrix);
             break;
         // w: move up
         case 87:
@@ -521,7 +521,9 @@ function onKeyDown(event) {
             } else {
                 console.log('enter w');
             }
-            shapes_ty[shapes_ty.length-1] += SHIFT_DISTANCE;
+            mvMatrix = translation_matrices.pop();
+            mvMatrix = mat4.translate(mvMatrix, [0, SHIFT_DISTANCE, 0]);
+            translation_matrices.push(mvMatrix);
             break;
         ////////////////////////////////////
         /////////      color      //////////
@@ -530,7 +532,9 @@ function onKeyDown(event) {
             if (event.shiftKey) {
                 console.log('enter R');
                 // rotation
-                shapes_rotation[shapes_rotation.length-1] += ROTATION_ANGLE;	  	  
+                mvMatrix = translation_matrices.pop();
+                mvMatrix = mat4.rotate(mvMatrix, degToRad(ROTATION_ANGLE), [0, 0, 1]);  // rotate if any	  	  
+                translation_matrices.push(mvMatrix);
             }
             else {
                 console.log('enter r');
@@ -564,17 +568,25 @@ function onKeyDown(event) {
         case 69:
             if (event.shiftKey) {
                 console.log('enter E');
-                shapes_scale[shapes.length-1]*=1.1; 	
+                shapes_scale[shapes.length-1] *= 1.1;
                 if (polygon_mode == 'p') {
                     pointSize *= 1.1;
-                }		  	  
+                } else {
+                    mvMatrix = translation_matrices.pop();
+                    mvMatrix = mat4.scale(mvMatrix, [1.1, 1.1, 1.1]);
+                    translation_matrices.push(mvMatrix);
+                }  	  
             }
             else {
                 console.log('enter e');
-                shapes_scale[shapes.length-1]*=0.9;
+                shapes_scale[shapes.length-1] *= 0.9;
                 if (polygon_mode == 'p') {
                     pointSize *= 0.9;
-                }		  	  		  
+                } else {
+                    mvMatrix = translation_matrices.pop();
+                    mvMatrix = mat4.scale(mvMatrix, [0.9, 0.9, 0.9]);
+                    translation_matrices.push(mvMatrix);
+                }  	  		  
             }
             break;
         // clear
@@ -587,10 +599,8 @@ function onKeyDown(event) {
             shapes = [];
             colors = [];
             shape_size = [0,0,0,0];
-            shapes_tx = [];
-            shapes_ty = [];
-            shapes_rotation = [];
             shapes_scale = [];
+            translation_matrices = [];
             Z_angle = 0.0;
             break;
     }
