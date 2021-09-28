@@ -280,3 +280,4 @@ var custom_shape_vertices = [
 ];
 
 custom_shape_vertices = custom_shape_vertices.map((value) => value/500);
+custom_vertices_length = custom_shape_vertices.length;

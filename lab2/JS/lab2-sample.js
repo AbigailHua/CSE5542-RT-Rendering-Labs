@@ -1,5 +1,3 @@
-
-
 ///////////////////////////////////////////////////////////////////////
 //
 //     CSE 5542 AU 2019  LAB 2  Sample Code
@@ -15,18 +13,59 @@ var shaderProgram;  // the shader program
 //viewport info 
 var vp_minX, vp_maxX, vp_minY, vp_maxY, vp_width, vp_height; 
 
-var PointVertexPositionBuffer;
-var LineVertexPositionBuffer;
-var TriangleVertexPositionBuffer;
-var SquareVertexPositionBuffer;
-var CustomShapeVertexPositionBuffer;
+const NUM_OF_SHAPES = 5;
+var PositionBufferList = [];
+var ColorBufferList = [];
 
-var pointColorBuffer;
-var lineColorBuffer;
-var triangleColorBuffer;
-var squareColorBuffer;
-var customShapeColorBuffer;
-
+const itemSize = 3;
+const numItems = [1, 2, 3, 6, custom_vertices_length/3];
+const ShapeVertexList = [
+    [
+         0.0, 0.0, 0.0
+    ],
+    [
+        -0.1, 0.0, 0.0,
+	     0.1, 0.0, 0.0
+    ],
+    [
+         0.0, 0.1, 0.0,
+         0.1,-0.1, 0.0,
+        -0.1,-0.1, 0.0
+    ],
+    [
+        -0.1, 0.1, 0.0,
+         0.1, 0.1, 0.0,
+         0.1,-0.1, 0.0,
+        -0.1,-0.1, 0.0,
+        -0.1, 0.1, 0.0,
+         0.1,-0.1, 0.0
+    ],
+    custom_shape_vertices
+];
+const ShapeColorList = [
+    [
+        1.0, 0.0, 0.0
+    ],
+    [
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0
+    ],
+    [
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0
+    ],
+    [
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0
+    ],
+    new Array(custom_shape_vertices.length/3).fill([1.0, 0.0, 0.0]).flat()
+];
+var ShapeModeList = [];
 var point_colors;
 var line_colors;
 var triangle_colors;
@@ -60,6 +99,7 @@ function initGL(canvas) {
     if (!gl) {
         alert("Could not initialise WebGL, sorry :-(");
     }
+    ShapeModeList = [gl.POINTS, gl.LINES, gl.TRIANGLES, gl.TRIANGLES, gl.TRIANGLES];
 }
 
 ///////////////////////////////////////////////////////////////
@@ -89,112 +129,19 @@ function webGLStart() {
 //////////////////////////////////////////////////////////////////
 /////////////             Create VBOs            /////////////////
 function CreateBuffer() {
-    // create point buffer
-    var point_vertices = [
-        0.0, 0.0, 0.0
-    ];
-    PointVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, PointVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point_vertices), gl.STATIC_DRAW);
-    PointVertexPositionBuffer.itemSize = 3;
-    PointVertexPositionBuffer.numItems = 1;
-    
-    pointColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, pointColorBuffer);
-    point_colors = [
-        1.0, 0.0, 0.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point_colors), gl.STATIC_DRAW);
-    pointColorBuffer.itemSize = 3;
-    pointColorBuffer.numItems = 1;
+    for (let i=0; i<NUM_OF_SHAPES; i++) {
+        PositionBufferList.push(gl.createBuffer());
+        gl.bindBuffer(gl.ARRAY_BUFFER, PositionBufferList[i]);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ShapeVertexList[i]), gl.STATIC_DRAW);
+        PositionBufferList[i].itemSize = itemSize;
+        PositionBufferList[i].numItems = numItems[i];
 
-    // create line buffer
-    var line_vertices = [         // A VBO for horizontal line in a standard position. To be translated to position of mouse click 
-        -0.1, 0.0, 0.0,
-	     0.1, 0.0, 0.0
-    ];
-    LineVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, LineVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(line_vertices), gl.STATIC_DRAW);
-    LineVertexPositionBuffer.itemSize = 3;  // NDC'S [x,y,0] 
-    LineVertexPositionBuffer.numItems = 2;// this buffer only contains A line, so only two vertices 
-
-    lineColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, lineColorBuffer);
-    line_colors = [
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(line_colors), gl.STATIC_DRAW);
-    lineColorBuffer.itemSize = 3;
-    lineColorBuffer.numItems = 2;
-
-    // create triangle buffer
-    var triangle_vertices = [
-        0.0, 0.1, 0.0,
-        0.0866, -0.05, 0.0,
-        -0.0866, -0.05, 0.0
-    ];
-    TriangleVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, TriangleVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangle_vertices), gl.STATIC_DRAW);
-    TriangleVertexPositionBuffer.itemSize = 3;
-    TriangleVertexPositionBuffer.numItems = 3;
-
-    triangleColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
-    triangle_colors = [
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangle_colors), gl.STATIC_DRAW);
-    triangleColorBuffer.itemSize = 3;
-    triangleColorBuffer.numItems = 3;
-
-    // create square buffer
-    var square_vertices = [
-        -0.1, 0.1, 0.0,
-        0.1, 0.1, 0.0,
-        0.1, -0.1, 0.0,
-        -0.1, -0.1, 0.0,
-        -0.1, 0.1, 0.0,
-        0.1, -0.1, 0.0
-    ];
-    SquareVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, SquareVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(square_vertices), gl.STATIC_DRAW);
-    SquareVertexPositionBuffer.itemSize = 3;
-    SquareVertexPositionBuffer.numItems = 6;
-
-    squareColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
-    square_colors = [
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(square_colors), gl.STATIC_DRAW);
-    squareColorBuffer.itemSize = 3;
-    squareColorBuffer.numItems = 6;
-
-    // create custom shape buffer
-    CustomShapeVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, CustomShapeVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(custom_shape_vertices), gl.STATIC_DRAW);
-    CustomShapeVertexPositionBuffer.itemSize = 3;
-    CustomShapeVertexPositionBuffer.numItems = custom_shape_vertices.length / 3;
-
-    customShapeColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, customShapeColorBuffer);
-    custom_shape_colors = new Array(custom_shape_vertices.length/3).fill([1.0, 0.0, 0.0]).flat();
-    console.log('ccc ', custom_shape_colors);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(custom_shape_colors), gl.STATIC_DRAW);
-    customShapeColorBuffer.itemSize = 3;
-    customShapeColorBuffer.numItems = CustomShapeVertexPositionBuffer.numItems = custom_shape_vertices.length / 3;
+        ColorBufferList.push(gl.createBuffer());
+        gl.bindBuffer(gl.ARRAY_BUFFER, ColorBufferList[i]);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ShapeColorList[i]), gl.STATIC_DRAW);
+        ColorBufferList[i].itemSize = itemSize;
+        ColorBufferList[i].numItems = numItems[i];
+    }
 }
 
 ///////////////////////////////////////////////////////
@@ -229,80 +176,18 @@ function draw_lines() {   // lab1 sample - draw lines only
         
         setMatrixUniforms();   // pass the matrix to the vertex shader
 
-        switch (value) {
-            case 'p':
-                setPointSize();
-                gl.bindBuffer(gl.ARRAY_BUFFER, PointVertexPositionBuffer);    // make the point current buffer 
-                gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, PointVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                
-                gl.deleteBuffer(pointColorBuffer);
-                pointColorBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, pointColorBuffer);
-                point_colors = current_colors;
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(point_colors), gl.STATIC_DRAW);
-                pointColorBuffer.itemSize = 3;
-                pointColorBuffer.numItems = 1;
-                gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, pointColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                gl.drawArrays(gl.POINTS, 0, PointVertexPositionBuffer.numItems);
-                break;
-            case 'l':
-                gl.bindBuffer(gl.ARRAY_BUFFER, LineVertexPositionBuffer);    // make the line current buffer 
-                gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, LineVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                
-                gl.deleteBuffer(lineColorBuffer);
-                lineColorBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, lineColorBuffer);
-                line_colors = new Array(LineVertexPositionBuffer.numItems).fill(current_colors).flat();
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(line_colors), gl.STATIC_DRAW);
-                lineColorBuffer.itemSize = 3;
-                lineColorBuffer.numItems = 2;
-                gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, lineColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                gl.drawArrays(gl.LINES, 0, LineVertexPositionBuffer.numItems);
-                break;
-            case 't':
-                gl.bindBuffer(gl.ARRAY_BUFFER, TriangleVertexPositionBuffer);    // make the triangle current buffer 
-                gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, TriangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                
-                gl.deleteBuffer(triangleColorBuffer);
-                triangleColorBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, triangleColorBuffer);
-                triangle_colors = new Array(TriangleVertexPositionBuffer.numItems).fill(current_colors).flat();
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangle_colors), gl.STATIC_DRAW);
-                triangleColorBuffer.itemSize = 3;
-                triangleColorBuffer.numItems = 3;
-                gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, triangleColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                gl.drawArrays(gl.TRIANGLES, 0, TriangleVertexPositionBuffer.numItems);
-                break;
-            case 'q':
-                gl.bindBuffer(gl.ARRAY_BUFFER, SquareVertexPositionBuffer);    // make the square current buffer 
-                gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, SquareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                
-                gl.deleteBuffer(squareColorBuffer);
-                squareColorBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
-                square_colors = new Array(SquareVertexPositionBuffer.numItems).fill(current_colors).flat();
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(square_colors), gl.STATIC_DRAW);
-                squareColorBuffer.itemSize = 3;
-                squareColorBuffer.numItems = 3;
-                gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, squareColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                gl.drawArrays(gl.TRIANGLES, 0, SquareVertexPositionBuffer.numItems);
-                
-                break;
-            case 'o':
-                gl.bindBuffer(gl.ARRAY_BUFFER, CustomShapeVertexPositionBuffer);    // make the custom shape current buffer 
-                gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, CustomShapeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-                gl.deleteBuffer(customShapeColorBuffer);
-                customShapeColorBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, customShapeColorBuffer);
-                custom_shape_colors = new Array(CustomShapeVertexPositionBuffer.numItems).fill(current_colors).flat();
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(custom_shape_colors), gl.STATIC_DRAW);
-                customShapeColorBuffer.itemSize = 3;
-                customShapeColorBuffer.numItems = 1;
-                gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, customShapeColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-                gl.drawArrays(gl.TRIANGLES, 0, CustomShapeVertexPositionBuffer.numItems);
-                break;
-        }
+        if (value == 'p') setPointSize();
+            
+        let tmp = shape2Num[value];
+        gl.bindBuffer(gl.ARRAY_BUFFER, PositionBufferList[tmp]);    // make the point current buffer 
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, PositionBufferList[tmp].itemSize, gl.FLOAT, false, 0, 0);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, ColorBufferList[tmp]);
+        ShapeColorList[i] = new Array(numItems[tmp]).fill(current_colors).flat();
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ShapeColorList[i]), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, ColorBufferList[tmp].itemSize, gl.FLOAT, false, 0, 0);
+        
+        gl.drawArrays(ShapeModeList[tmp], 0, PositionBufferList[tmp].numItems);
     });
 }
 
@@ -311,7 +196,7 @@ function draw_lines() {   // lab1 sample - draw lines only
 function initScene() {
     vp_minX = 0; vp_maxX = gl.canvasWidth;  vp_width = vp_maxX- vp_minX+1; 
     vp_minY = 0; vp_maxY = gl.canvasHeight; vp_height = vp_maxY-vp_minY+1; 
-    console.log(vp_minX, vp_maxX, vp_minY, vp_maxY); 
+    console.log(vp_minX, vp_maxX, vp_minY, vp_maxY);
     gl.viewport(vp_minX, vp_minY, vp_width, vp_height); 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -328,7 +213,7 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     draw_lines();
-    }
+}
 
 
 ///////////////////////////////////////////////////////////////
