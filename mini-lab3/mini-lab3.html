@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<title>hwshen WebGL &mdash; code03 </title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="style.css">
+
+<!--  ************** Fragment Shader ************* --> 
+<script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec4 uColor; 
+
+void main(void) {
+        gl_FragColor = uColor; 
+    }
+</script>
+
+<!--  ************** Vertex Shader ************* --> 
+<script id="shader-vs" type="x-shader/x-vertex">
+
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexColor;
+    uniform mat4 uMVMatrix;
+
+    void main(void) {
+
+     gl_PointSize = 10.0; 
+
+      gl_Position = uMVMatrix*vec4(aVertexPosition, 1.0);
+    }
+</script>
+
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="JS/shaders_setup.js"></script>
+<script type="text/javascript" src="JS/mini-lab3.js"></script>
+
+</head>
+
+
+<body onload="webGLStart();">
+    <div class="wrapper">
+        <canvas id="code03-canvas"style="border:none;"width="500"height="500"></canvas>
+        <div class="wrapper-usage">
+            <h2>Say Hi to Medusa!</h2>
+            <h3>Hover on the keyboard below to see usage!</h3>
+            <!--
+                Keyboard:
+                The style is inspired by image in:
+                https://keyshorts.com/blogs/blog/44712961-how-to-identify-laptop-keyboard-localization#us-english
+                And the code is modified from http://jsfiddle.net/u4qa7/
+            -->
+            <div class="keyboard">
+                <div class="keyboardRow">
+                    <span class="key-light">~<br>`</span>
+                    <span class="key" title='1: Rotate hair1 counterclockwise
+!: Rotate hair1 clockwise'>!<br>1</span>
+                    <span class="key" title='2: Rotate hair2 counterclockwise
+@: Rotate hair2 clockwise'>@<br>2</span>
+                    <span class="key" title='3: Rotate hair3 counterclockwise
+#: Rotate hair3 clockwise'>#<br>3</span>
+                    <span class="key" title='4: Rotate hair4 counterclockwise
+$: Rotate hair4 clockwise'>$<br>4</span>
+                    <span class="key-light">%<br>5</span>
+                    <span class="key-light">^<br>6</span>
+                    <span class="key-light">&<br>7</span>
+                    <span class="key-light">*<br>8</span>
+                    <span class="key-light">(<br>9</span>
+                    <span class="key-light">)<br>0</span>
+                    <span class="key-light">—<br>-</span>
+                    <span class="key-light">+<br>=</span>
+                </div>
+                <div class="keyboardRow">
+                    <span class="key" title='q: Rotate left arm counterclockwise
+Q: Rotate left arm clockwise'>Q</span>
+                    <span class="key" title='w: Rotate left forearm counterclockwise
+W: Rotate left forearm clockwise'>W</span>
+                    <span class="key" title='e: Zoom off the whole robot
+E: Zoom in the whole robot'>E</span>
+                    <span class="key" title='r: Rotate the whole robot counterclockwise
+R: Rotate the whole robot clockwise'>R</span>
+                    <span class="key-light">T</span>
+                    <span class="key" title='Y/y: Move the whole robot upward'>Y</span>
+                    <span class="key-light">U</span>
+                    <span class="key-light">I</span>
+                    <span class="key" title='o: Rotate right forearm counterclockwise
+O: Rotate right forearm clockwise'>O</span>
+                    <span class="key"title='p: Rotate right arm counterclockwise
+P: Rotate right arm clockwise'>P</span>
+                </div>
+                <div class="keyboardRow">
+                    <span class="key" title='a: Rotate left thigh counterclockwise
+A: Rotate left thigh clockwise'>A</span>
+                    <span class="key" title='s: Rotate left calf counterclockwise
+S: Rotate left calf clockwise'>S</span>
+                    <span class="key" title='d: Rotate left foot counterclockwise
+D: Rotate left foot counterclockwise'>D</span>
+                    <span class="key-light">F</span>
+                    <span class="key" title='G/g: Move the whole robot to the left'>G</span>
+                    <span class="key" title='H/h: Move the whole robot to the right'>H</span>
+                    <span class="key" title='j: Rotate right foot counterclockwise
+J: Rotate right foot clockwise'>J</span>
+                    <span class="key" title='k: Rotate right calf counterclockwise
+K: Rotate right calf clockwise'>K</span>
+                    <span class="key" title='l: Rotate right thigh counterclockwise
+L: Rotate right thigh clockwise'>L</span>
+                </div>
+                <div class="keyboardRow">
+                    <span class="key" title='z: Rotate neck counterclockwise
+Z: Rotate neck clockwise'>Z</span>
+                    <span class="key" title='x: Rotate head counterclockwise
+X: Rotate head clockwise'>X</span>
+                    <span class="key-light">C</span>
+                    <span class="key-light">V</span>
+                    <span class="key" title='B/b: Move the whole robot downward'>B</span>
+                    <span class="key-light">N</span>
+                    <span class="key-light">M</span>
+                    <span class="key-light"><<br>,</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+

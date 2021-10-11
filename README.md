@@ -12,8 +12,12 @@ Press key and draw certain shapes at random place on canvas. (9/16)
 
 One VBO per shape (9/23)
 
-add rotation, translation and scale feature (9/23)
+Add rotation, translation and scale feature (9/23)
 
-color change (9/23)
+Color change (9/23)
 
-custom shape (9/24)
+Custom shape (9/24)
+
+#### Mini-Lab 3
+
+Hierarchical transformation (10/10)
