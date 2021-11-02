@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<title>hwshen WebGL &mdash; 3D cube  </title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<!--  ************** Fragment Shader ************* --> 
+<script id="shader-fs" type="x-shader/x-fragment">
+  precision mediump float;
+  uniform vec4 uColor;
+  
+  void main(void) {
+          gl_FragColor = uColor; 
+      }
+  </script>
+  
+  <!--  ************** Vertex Shader ************* --> 
+  <script id="shader-vs" type="x-shader/x-vertex">
+  
+      attribute vec3 aVertexPosition;
+      attribute vec3 aVertexColor;
+  
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix; 
+  
+  
+      void main(void) {
+  
+        gl_PointSize = 10.0; 
+        gl_Position = uPMatrix* uMVMatrix*vec4(aVertexPosition, 1.0);
+      }
+  </script>
+
+
+<script type="text/javascript" src="JS/shaders_setup.js"></script>
+<script type="text/javascript" src="JS/shapes.js"></script>
+<script type="text/javascript" src="JS/lab3-partII.js"></script>
+
+</head>
+
+
+<body onload="webGLStart();">
+  <div class="wrapper">
+    <canvas id="code03-canvas"style="border:none;"width="500"height="500"></canvas>
+    <div class="wrapper-usage">
+        <h2>Say Hi to Medusa!</h2>
+        <h3>Hover on the keyboard below to see usage!</h3>
+        <!--
+            Keyboard:
+            The style is inspired by image in:
+            https://keyshorts.com/blogs/blog/44712961-how-to-identify-laptop-keyboard-localization#us-english
+            And the code is modified from http://jsfiddle.net/u4qa7/
+        -->
+        <div class="keyboard">
+            <div class="keyboardRow">
+                <span class="key" title='~/`: Toggle axes'>~<br>`</span>
+                <span class="key" title='1: Rotate hair1 counterclockwise
+!: Rotate hair1 clockwise'>!<br>1</span>
+                <span class="key" title='2: Rotate hair2 counterclockwise
+@: Rotate hair2 clockwise'>@<br>2</span>
+                <span class="key" title='3: Rotate hair3 counterclockwise
+#: Rotate hair3 clockwise'>#<br>3</span>
+                <span class="key" title='4: Rotate hair4 counterclockwise
+$: Rotate hair4 clockwise'>$<br>4</span>
+                <span class="key" title='5: Rotate hat counterclockwise
+%: Rotate hat clockwise'>%<br>5</span>
+                <span class="key-light">^<br>6</span>
+                <span class="key-light">&<br>7</span>
+                <span class="key-light">*<br>8</span>
+                <span class="key-light">(<br>9</span>
+                <span class="key-light">)<br>0</span>
+                <span class="key-light">—<br>-</span>
+                <span class="key-light">+<br>=</span>
+                <span class="key-backspace">Backspace</span>
+            </div>
+            <div class="keyboardRow">
+                <span class="key-tab">Tab</span>
+                <span class="key" title='q: Rotate left arm counterclockwise
+Q: Rotate left arm clockwise'>Q</span>
+                <span class="key" title='w: Rotate left forearm counterclockwise
+W: Rotate left forearm clockwise'>W</span>
+                <span class="key" title='e: Zoom off the whole robot
+E: Zoom in the whole robot'>E</span>
+                <span class="key" title='r: Rotate the whole robot counterclockwise
+R: Rotate the whole robot clockwise'>R</span>
+                <span class="key" title='t: Rotate the badge counterclockwise
+T: Rotate the badge clockwise'>T</span>
+                <span class="key" title='Y/y: Move the whole robot upward'>Y</span>
+                <span class="key-light">U</span>
+                <span class="key-light">I</span>
+                <span class="key-light">O</span>
+                <span class="key" title='p: Rotate the camera counterclockwise
+P: Rotate the camera clockwise'>P</span>
+                <span class="key" title='[: Rotate right forearm counterclockwise
+{: Rotate right forearm clockwise'>{<br>[</span>
+                <span class="key" title=']: Rotate right arm counterclockwise
+}: Rotate right arm clockwise'>}<br>]</span>
+                <span class="key-slash" title='|/\: Toggle mode'>|<br>\</span>
+            </div>
+            <div class="keyboardRow">
+                <span class="key-caps">CapsLock</span>
+                <span class="key" title='a: Rotate left thigh counterclockwise
+A: Rotate left thigh clockwise'>A</span>
+                <span class="key" title='s: Rotate left calf counterclockwise
+S: Rotate left calf clockwise'>S</span>
+                <span class="key" title='d: Rotate left foot counterclockwise
+D: Rotate left foot counterclockwise'>D</span>
+                <span class="key-light">F</span>
+                <span class="key" title='G/g: Move the whole robot to the left'>G</span>
+                <span class="key" title='H/h: Move the whole robot to the right'>H</span>
+                <span class="key" title='J/j: Move camera downward'>J</span>
+                <span class="key" title='K/k: Move camera upward'>K</span>
+                <span class="key" title='l: Rotate right foot counterclockwise
+L: Rotate right foot clockwise'>L</span>
+                <span class="key" title=';: Rotate right calf counterclockwise
+:: Rotate right calf clockwise'>:<br>;</span>
+                <span class="key" title='&lsquo;: Rotate right thigh counterclockwise
+&quot;: Rotate right thigh clockwise'>&quot;<br>&lsquo;</span>
+                <span class="key-enter">Enter</span>
+            </div>
+            <div class="keyboardRow">
+                <span class="key-left-shift">Shift</span>
+                <span class="key" title='z: Rotate neck counterclockwise
+Z: Rotate neck clockwise'>Z</span>
+                <span class="key" title='x: Rotate head counterclockwise
+X: Rotate head clockwise'>X</span>
+                <span class="key-light">C</span>
+                <span class="key" title='V/v: Move the whole robot closer'>V</span>
+                <span class="key" title='B/b: Move the whole robot downward'>B</span>
+                <span class="key" title='N/n: Move the whole robot further'>N</span>
+                <span class="key" title='M/m: Move camera backward'>M</span>
+                <span class="key" title='</,: Move camera left'><<br>,</span>
+                <span class="key" title='>/.: Move camera right'>><br>.</span>
+                <span class="key" title='?//: Move camera toward'>?<br>/</span>
+                <span class="key-right-shift">Shift</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
+

@@ -138,7 +138,7 @@ var degreeDict = {
     
      ///////////////////////////////////////////////////////////////
 
-    function drawScene() {
+    function drawSquare() {
 
         var matrixStack = []; 
 
@@ -376,7 +376,7 @@ var Z_angle =0;
           lastMouseX = mouseX;
           lastMouseY = mouseY;
 
-          drawScene();
+          drawSquare();
      }
 
      function onDocumentMouseUp( event ) {
@@ -418,31 +418,31 @@ var Z_angle =0;
        mvMatrix = mat4.translate(mvMatrix, [0, 0.3, 0]); 
        mvMatrix = mat4.scale(mvMatrix, [0.2, 0.2, 0.2]);
 
-       drawScene();
+       drawSquare();
     }
 
 function BG(red, green, blue) {
 
     gl.clearColor(red, green, blue, 1.0);
-    drawScene(); 
+    drawSquare(); 
 
 } 
 
 function redraw() {
-    drawScene();
+    drawSquare();
 }
     
 
 function geometry(type) {
     draw_type = type;
-    drawScene();
+    drawSquare();
 } 
 
 var drawAxis = false; 
 
 function draw_axis(){
    drawAxis = !drawAxis; 
-   drawScene(); 
+   drawSquare(); 
 }
 
 var delta = 0.2;
@@ -614,7 +614,15 @@ var delta = 0.2;
                 console.log('enter B/b');
                 mvMatrix = mat4.translate(mvMatrix, [0.0, -0.1, 0]);
                 break;
+            case '~': case '`':
+                console.log('enter ~/`');
+                drawAxis = !drawAxis;
+                break;
+            case '<': case ',':
+                console.log('enter </,');
+                draw_type = (draw_type+1)%3;
+                break;
       }
 
-	drawScene();	 // draw the VBO 
+	drawSquare();	 // draw the VBO 
     }

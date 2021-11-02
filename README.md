@@ -21,3 +21,10 @@ Custom shape (9/24)
 #### Mini-Lab 3
 
 Hierarchical transformation (10/10)
+
+Toggle draw mode, toggle axes (11/1)
+
+#### Lab3 Part II
+
+3D objects, hierarchical transformation, camera look around (11/1)
+
