@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<title>hwshen WebGL &mdash; Gouraud Shading </title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<!--  ************** Fragment Shader ************* --> 
+<script id="shader-fs-phong" type="x-shader/x-fragment">
+
+  //
+  // fragment shader
+  //
+  precision mediump float;
+  varying vec3 normalInterp;  // Surface normal
+  varying vec3 vertPos;       // Vertex position
+  uniform int mode;
+  uniform vec3 ambient_coef;   // Ambient reflection coefficient
+  uniform vec3 diffuse_coef;   // Diffuse reflection coefficient
+  uniform vec3 specular_coef;   // Specular reflection coefficient
+  uniform float mat_shininess; // Shininess
+  // Material color
+  uniform vec3 light_ambient;
+  uniform vec3 light_diffuse;
+  uniform vec3 light_specular;
+  uniform vec3 light_pos; // Light position
+  
+  void main() {
+    vec3 N = normalize(normalInterp);
+    vec3 L = normalize(light_pos - vertPos);
+  
+    // Lambert's cosine law
+    float lambertian = max(dot(N, L), 0.0);
+    float specular = 0.0;
+    if(lambertian > 0.0) {
+      vec3 R = reflect(-L, N);      // Reflected light vector
+      vec3 V = normalize(-vertPos); // Vector to viewer
+      // Compute the specular term
+      float specAngle = max(dot(R, V), 0.0);
+      specular = pow(specAngle, mat_shininess);
+    }
+    gl_FragColor = vec4(ambient_coef * light_ambient +
+                        diffuse_coef * lambertian * light_diffuse +
+                        specular_coef * specular * light_specular, 1.0);
+  
+    // only ambient
+    if(mode == 2)
+      gl_FragColor = vec4(ambient_coef * light_ambient, 1.0);
+    // only diffuse
+    if(mode == 3) {
+      if (ambient_coef[0] < 0.99) gl_FragColor = vec4(diffuse_coef * lambertian * light_diffuse, 1.0);
+      else gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+      
+    // only specular
+    if(mode == 4)
+    if (ambient_coef[0] < 0.99) gl_FragColor = vec4(specular_coef * specular * light_specular, 1.0);
+    else gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  }
+  
+</script>
+
+<!--  ************** Vertex Shader ************* --> 
+<script id="shader-vs-phong" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  uniform mat4 uMVMatrix, uPMatrix, uNMatrix;
+  varying vec3 normalInterp;
+  varying vec3 vertPos;
+  
+  void main(){
+    vec4 vertPos4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+    vertPos = vec3(vertPos4) / vertPos4.w;
+    normalInterp = vec3(uNMatrix * vec4(aVertexNormal, 0.0));
+    gl_Position = uPMatrix * vertPos4;
+  }
+
+</script>
+
+<!--  ************** Fragment Shader ************* --> 
+<script id="shader-fs-toon" type="x-shader/x-fragment">
+
+  //
+  // fragment shader
+  //
+  precision mediump float;
+  varying vec3 normalInterp;  // Surface normal
+  varying vec3 vertPos;       // Vertex position
+  uniform int mode;
+  uniform vec3 ambient_coef;   // Ambient reflection coefficient
+  uniform vec3 diffuse_coef;   // Diffuse reflection coefficient
+  uniform vec3 specular_coef;   // Specular reflection coefficient
+  uniform float mat_shininess; // Shininess
+  // Material color
+  uniform vec3 light_ambient;
+  uniform vec3 light_diffuse;
+  uniform vec3 light_specular;
+  uniform vec3 light_pos; // Light position
+  
+  void main() {
+    vec3 N = normalize(normalInterp);
+    vec3 L = normalize(light_pos - vertPos);
+    float intensity = dot(N, L);
+    
+    if (ambient_coef[0] > 0.99) {
+      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      return;
+    }
+    if (intensity > 0.95) gl_FragColor = vec4(diffuse_coef * 0.95, 1.0);
+    else if (intensity > 0.85) gl_FragColor = vec4(diffuse_coef * 0.85, 1.0);
+    else if (intensity > 0.75) gl_FragColor = vec4(diffuse_coef * 0.75, 1.0);
+    else if (intensity > 0.65) gl_FragColor = vec4(diffuse_coef * 0.65, 1.0);
+    else if (intensity > 0.5) gl_FragColor = vec4(diffuse_coef * 0.5, 1.0);
+    else if (intensity > 0.4) gl_FragColor = vec4(diffuse_coef * 0.4, 1.0);
+    else if (intensity > 0.3) gl_FragColor = vec4(diffuse_coef * 0.3, 1.0);
+    else if (intensity > 0.1) gl_FragColor = vec4(diffuse_coef * 0.1, 1.0);
+    else gl_FragColor = vec4(diffuse_coef * 0.2, 1.0);    
+  }
+  
+</script>
+
+<!--  ************** Vertex Shader ************* --> 
+<script id="shader-vs-toon" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  uniform mat4 uMVMatrix, uPMatrix, uNMatrix;
+  varying vec3 normalInterp;
+  varying vec3 vertPos;
+  
+  void main(){
+    vec4 vertPos4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+    vertPos = vec3(vertPos4) / vertPos4.w;
+    normalInterp = vec3(uNMatrix * vec4(aVertexNormal, 0.0));
+    gl_Position = uPMatrix * vertPos4;
+  }
+
+</script>
+
+
+<script type="text/javascript" src="JS/shaders_setup.js"></script>
+<script type="text/javascript" src="JS/lab4.js"></script>
+<script type="text/javascript" src="JS/shapes.js"></script>
+
+</head>
+
+
+<body onload="webGLStart();">
+  <div class="wrapper">
+    <div class="wrapper-canvas">
+      <canvas id="code03-canvas"style="border:none;"width="500"height="500"></canvas>
+    </div>
+    
+    <div class="wrapper-usage">
+        <h2>Say Hi to Medusa!</h2>
+        <h3>Task 1</h3>
+        <ul>
+          <li><code>A/a</code>: Ambient light only</li>
+          <li><code>S/s</code>: Specular light only</li>
+          <li><code>D/d</code>: Diffuse light only</li>
+          <li><code>W/w</code>: Ambient + specular + diffuse</li>
+        </ul>
+        <h3>Task 2</h3>
+        <ul>
+          <li><code>L/l</code>: Move the light along positive direction of X axis</li>
+          <li><code>J/j</code>: Move the light along negative direction of X axis</li>
+          <li><code>I/i</code>: Move the light along positive direction of Y axis</li>
+          <li><code>K/k</code>: Move the light along negative direction of Y axis</li>
+          <li><code>M/m</code>: Move the light along positive direction of Z axis</li>
+          <li><code>N/n</code>: Move the light along negative direction of Z axis</li>
+        </ul>
+    </div>
+    <div class="wrapper-usage" style="margin-top: 60px; margin-left:-100px">
+      <h3>Task 3</h3>
+      <ul>
+        <li><code>Q/q</code>: Toggle Phong/Toon shading</li>
+      </ul>
+    </div>
+  </div>
+    
+
+</body>
+
+</html>
+

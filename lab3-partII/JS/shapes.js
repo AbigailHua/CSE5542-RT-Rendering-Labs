@@ -171,20 +171,7 @@ function initCylinderBuffer(radius=1, height=1) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderVertexIndexBuffer); 
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);  
     cylinderVertexIndexBuffer.itemsize = 1;
-    cylinderVertexIndexBuffer.numItems = 2*sampleNum*3;   //36 indices, 3 per triangle, so 12 triangles 
-
-    // cylinderVertexColorBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, cylinderVertexColorBuffer);
-    // var colors = Array.from(Array(2*sampleNum).keys()).map((v, idx) => {
-    //     switch(idx%3){
-    //         case 0: return [1, 0, 0];
-    //         case 1: return [0, 1, 0];
-    //         case 2: return [0, 0, 1];
-    //     }
-    // }).flat();
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    // cylinderVertexColorBuffer.itemSize = 3;
-    // cylinderVertexColorBuffer.numItems = 2*sampleNum;
+    cylinderVertexIndexBuffer.numItems = 2*sampleNum*3;   //36 indices, 3 per triangle, so 12 triangles
 }
 
 function initConeBuffer(radius=1, height=1) {
