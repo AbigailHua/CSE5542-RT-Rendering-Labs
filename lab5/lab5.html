@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<title>Abigail's Final Project</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<!--  ************** Fragment Shader ************* --> 
+<script id="shader-fs-phong" type="x-shader/x-fragment">
+  //
+  // fragment shader
+  //
+  precision mediump float;
+  precision mediump int;
+  varying vec3 normalInterp;  // Surface normal
+  varying vec3 vertPos;       // Vertex position
+  varying vec2 TexCoord;      // Texture coordinates
+
+  uniform int mode;
+  uniform vec3 ambient_coef;   // Ambient reflection coefficient
+  uniform vec3 diffuse_coef;   // Diffuse reflection coefficient
+  uniform vec3 specular_coef;   // Specular reflection coefficient
+  uniform float mat_shininess; // Shininess
+  // Material color
+  uniform vec3 light_ambient;
+  uniform vec3 light_diffuse;
+  uniform vec3 light_specular;
+  uniform vec3 light_pos; // Light position in eye space
+  uniform sampler2D textureKa;
+  uniform sampler2D textureKd;
+  uniform sampler2D textureKs;
+
+  uniform samplerCube cubeMap;
+
+  varying vec4 eye_pos;  // vertex position in eye space
+  varying vec3 v_normal;
+  uniform mat4 uV2WMatrix;
+  
+  void main() {
+    vec3 N = normalize(normalInterp);
+    vec3 L = normalize(light_pos - vertPos);
+  
+    // Lambert's cosine law
+    float lambertian = max(dot(N, L), 0.0);
+    float specular = 0.0;
+    if(lambertian > 0.0) {
+      vec3 R = reflect(-L, N);      // Reflected light vector
+      vec3 V = normalize(-vertPos); // Vector to viewer
+      // Compute the specular term
+      float specAngle = max(dot(R, V), 0.0);
+      specular = pow(specAngle, mat_shininess);
+    }
+    vec3 a = ambient_coef * light_ambient;
+    vec3 d = diffuse_coef * lambertian * light_diffuse;
+    vec3 s = specular_coef * specular * light_specular;
+
+    // cubemap
+    if (mode == -1) {
+      vec3 ref = normalize(reflect(normalize(eye_pos.xyz), v_normal));  // in eye space
+	    ref = vec3(uV2WMatrix*vec4(ref,0));   // convert to world space
+      vec4 tc = textureCube(cubeMap, ref);
+      gl_FragColor = vec4((a+d+s)*tc.rgb, 1.0);
+    }
+    // texture
+    else if (mode == 0)
+      gl_FragColor = vec4(a*texture2D(textureKa, TexCoord).rgb+d*texture2D(textureKd, TexCoord).rgb+s*texture2D(textureKs, TexCoord).rgb, 1.0);
+    // ambient + diffuse + specular
+    else if (mode == 1) gl_FragColor = vec4(a+d+s, 1.0);
+    // only ambient
+    else if(mode == 2)
+      gl_FragColor = vec4(ambient_coef * light_ambient, 1.0);
+    // only diffuse
+    else if(mode == 3) {
+      if (ambient_coef[0] < 0.99) gl_FragColor = vec4(diffuse_coef * lambertian * light_diffuse, 1.0);
+      else gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+    // only specular
+    else if(mode == 4)
+      if (ambient_coef[0] < 0.99)
+        gl_FragColor = vec4(specular_coef * specular * light_specular, 1.0);
+    // light
+    else gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      
+    
+  }
+  
+</script>
+
+<!--  ************** Vertex Shader ************* --> 
+<script id="shader-vs-phong" type="x-shader/x-vertex">
+  precision mediump float;
+  precision mediump int;
+
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  attribute vec2 aVertexTexCoords;
+  uniform mat4 uMVMatrix, uPMatrix, uNMatrix;
+  uniform mat4 uV2WMatrix;  // eye to world
+  uniform vec3 light_pos; // Light position in eye space
+
+  varying vec4 eye_pos;  // vertex position in eye space
+  varying vec3 v_normal;
+  varying vec3 normalInterp;
+  varying vec3 vertPos;
+  varying vec2 TexCoord;
+  
+  void main(){
+    // transform the vertex position to eye space 
+    eye_pos = uMVMatrix*vec4(aVertexPosition, 1.0);
+
+    // transform normal from local to eye space: normal matrix is the inverse transpose of the modelview matrix 
+	  v_normal = normalize(vec3(uNMatrix*vec4(aVertexNormal,0.0)));
+
+    TexCoord = aVertexTexCoords;
+    vec4 vertPos4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+    vertPos = vec3(vertPos4) / vertPos4.w;
+    normalInterp = vec3(uNMatrix * vec4(aVertexNormal, 0.0));
+    gl_Position = uPMatrix * vertPos4;
+  }
+
+</script>
+
+
+<script type="text/javascript" src="JS/settings.js"></script>
+<script type="text/javascript" src="JS/shaders_setup.js"></script>
+<script type="text/javascript" src="JS/lab4.js"></script>
+<script type="text/javascript" src="JS/shapes.js"></script>
+<script type="text/javascript" src="JS/myobj.js"></script>
+<script type="text/javascript" src="JS/objLoaderWithTexture.js"></script>
+<script type="text/javascript" src="JS/helper.js"></script>
+</head>
+
+
+<body onload="webGLStart();">
+  <div class="wrapper">
+    <div class="wrapper-canvas">
+      <canvas id="code03-canvas" style="border:none;" width="550" height="550"></canvas>
+    </div>
+    
+    <div class="wrapper-usage">
+        <h2>Note:</h2>
+        <ul>
+          <li>Floor, walls, ceiling, shelves: texture mapping on planar surfaces</li>
+          <li>Vase on the right: parametric surface with texture</li>
+          <li>Vase on the left: parametric surface with cubemap (<b>get closer and you can see the texture</b>)</li>
+          <li>Book: polygonal model with texture</li>
+          <li>Cube in the middle of the room: first person</li>
+        </ul>
+        <h2>Key map (click to expand):</h2>
+        <button type="button" class="collapsible">> Light:</button>
+        <div class="content">
+          <ul>
+            <li><code>L/l</code>: Move the light along positive direction of X axis</li>
+            <li><code>J/j</code>: Move the light along negative direction of X axis</li>
+            <li><code>I/i</code>: Move the light along positive direction of Y axis</li>
+            <li><code>K/k</code>: Move the light along negative direction of Y axis</li>
+            <li><code>M/m</code>: Move the light along positive direction of Z axis</li>
+            <li><code>N/n</code>: Move the light along negative direction of Z axis</li>
+          </ul>
+        </div>
+        <button type="button" class="collapsible">> Camera:</button>
+        <div class="content">
+          <ul>
+            <li>Drag the mouse to rotate global camera/first person on horizontal plane</li>
+            <li><code>F/f</code>: Toggle global camera/first person</li>
+            <li><code>A/a</code>: Move global camera/first person along pos/neg direction of X axis</li>
+            <li><code>S/s</code>: Move global camera/first person along pos/neg direction of Y axis</li>
+            <li><code>D/d</code>: Move global camera/first person along pos/neg direction of Z axis</li>
+          </ul>
+        </div>
+    </div>
+  </div>
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+
+    for (var xx = 0; xx < coll.length; xx++) {
+        coll[xx].addEventListener("click", function() {
+            console.log('click');
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+            content.style.display = "none";
+            } else {
+            content.style.display = "block";
+            }
+        });
+    }
+  </script>
+
+</body>
+
+</html>
+
